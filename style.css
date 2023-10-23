@@ -1,0 +1,49 @@
+html,
+body,
+* {
+    margin: 0;
+    padding: 0;
+    /* box-sizing: border-box; */
+}
+
+.container {
+    margin-top: 4em;
+    margin-left: 2em;
+    margin-right: 2em;
+}
+
+.section {
+    margin-top: 2em;
+}
+
+.section > h2 {
+    margin-bottom: 0.5em;
+}
+
+.section-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 1em;
+}
+
+.route-card {
+    padding: 1em 1em 0.5em 1em;
+    border: 1px solid black;
+    border-radius: 15px;
+}
+
+.stop {
+    text-align: right;
+    margin-top: 0.5em;
+    font-style: italic;
+}
+
+.direction {
+    display: flex;
+    justify-content: space-between;
+}
+
+.eta {
+    font-size: larger;
+    font-weight: bold;
+}
