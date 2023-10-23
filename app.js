@@ -56,21 +56,44 @@ app.get('/train/arrivals', async (req, res) => {
     }
 })
 
+app.get('/train/stops', async (req, res) => {
+    // line options: Red, BLue, Brn, G, Org, P, Pink, Y
+    const line = req.query.line
+    try {
+        const stopsResp = await axios.get('https://data.cityofchicago.org/resource/8pix-ypme.json', {
+            params: {
+                $query: `SELECT \`station_name\`, \`station_descriptive_name\`, \`map_id\` WHERE \`${line}\` IN ("true")`
+            }
+        })
+        const data = stopsResp.data.map(stop => {
+            let decrName = stop["station_descriptive_name"]
+            decrName = decrName.substring(decrName.indexOf('(') + 1, decrName.indexOf(')'))
+            const linesAtStation = decrName.replace(/\W|lines?/gi, ",").split(",").filter(x => x != "")
+            return {
+                stationName: stop["station_name"],
+                lines: linesAtStation,
+                station: stop["map_id"]
+            }
+        })
+        res.send(data)
+    } catch (error) {
+        res.status(500).send(error)
+    }
+
+})
+
 app.get('/bus/predictions', async (req, res) => {
     const predUrl = `${BUS_BASE_URL}/getpredictions`
-    const stop = req.query.stop
-    const route = req.query.route
     try {
         const predResp = await axios.get(predUrl, {
             params: {
                 ...BASE_BUS_PARAMS,
-                stpid: stop,
-                rt: route,
+                stpid: req.query.stop,
+                rt: req.query.route,
             }
         })
         const predRespBody = predResp.data['bustime-response']
-        console.log(predRespBody)
-        if("error" in predRespBody) throw Error(predRespBody.error)
+        if ("error" in predRespBody) throw Error(predRespBody.error)
 
         const data = predRespBody.prd.map(bus => {
             return {
@@ -83,9 +106,92 @@ app.get('/bus/predictions', async (req, res) => {
         })
         res.send(data)
     } catch (error) {
-        res.status(400).send(error)
+        res.status(500).send(error)
     }
 })
+
+const getDirection = async (route) => {
+    try {
+        const dirResp = await axios.get(`${BUS_BASE_URL}/getdirections`, {
+            params: {
+                ...BASE_BUS_PARAMS,
+                rt: route
+            }
+        })
+        const dirRespBody = dirResp.data['bustime-response']
+        if ("error" in dirRespBody) throw Error(dirRespBody.error)
+
+        return dirRespBody.directions.map(dir => dir.dir)
+    } catch (error) { return error }
+}
+
+const getStops = async (route, direction) => {
+    try {
+        const stopsResp = await axios.get(`${BUS_BASE_URL}/getstops`, {
+            params: {
+                ...BASE_BUS_PARAMS,
+                rt: route,
+                dir: direction,
+            }
+        })
+        const stopsRespBody = stopsResp.data['bustime-response']
+        if ("error" in stopsRespBody) throw Error(stopsRespBody.error)
+
+        return stopsRespBody.stops.map(stop => {
+            return {
+                stopId: stop.stpid,
+                stopName: stop.stpnm,
+                direction: direction
+            }
+        })
+
+    } catch (error) { return (error) }
+}
+
+app.get('/bus/routes', async (req, res) => {
+    try {
+        const routesResp = await axios.get(`${BUS_BASE_URL}/getroutes`, {
+            params: BASE_BUS_PARAMS
+        })
+        const routesRespBody = routesResp.data['bustime-response']
+        console.log(routesRespBody)
+        if ("error" in routesRespBody) throw Error(routesRespBody.error)
+
+        const data = routesRespBody.routes.map(route => {
+            return {
+                route: route.rt,
+                routeName: route.rtnm
+            }
+        })
+        res.send(data)
+    } catch (error) {
+        res.status(500).send(error)
+    }
+})
+
+app.get('/bus/stops', async (req, res) => {
+    const route = req.query.route
+    try {
+        const direction = await getDirection(route)
+        const stopsA = await getStops(route, direction[0])
+        const stopsB = await getStops(route, direction[1])
+        const stops = [...stopsA, ...stopsB].reduce((acc, curr) => {
+            const { stopId, stopName, direction } = curr;
+            let findStop = acc.find(s => s.stopName === stopName)
+            if (!findStop) {
+                acc.push({ stopName, [direction]: stopId })
+            } else {
+                findStop[direction] = stopId
+            }
+            return acc
+        }, [])
+        res.send({ [route]: stops })
+    } catch (error) {
+        console.log(error)
+        res.status(500).send(error)
+    }
+})
+
 
 app.listen(PORT, () => {
     console.log(`App listening on port ${PORT}`)
