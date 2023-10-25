@@ -6,30 +6,83 @@ body,
     /* box-sizing: border-box; */
 }
 
+.hide {
+    display: none
+}
+
 .container {
     margin-top: 4em;
     margin-left: 2em;
     margin-right: 2em;
+    position: relative;
 }
 
 .section {
     margin-top: 2em;
 }
 
-.section > h2 {
+.section > .header {
     margin-bottom: 0.5em;
+    display: flex;
+    justify-content: space-between;
+}
+
+.delete {
+    height: 20px;
+    width: 20px;
+    margin-top: -0.5em;
+    margin-right: -0.5em;
+    overflow: hidden
+}
+
+.add {
+    height: 20px;
+    width: 20px;
+    border: 1px solid gray;
+    border-radius: 5px;
+    overflow: hidden
+}
+
+.button {
+    border: none;
+    background-color: transparent;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: large;
+}
+
+.button:hover {
+    background-color: lightgray;
+}
+
+.button:active {
+    background-color: gray;
 }
 
 .section-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    column-gap: 1em;
+    gap: 1em;
 }
 
 .route-card {
     padding: 1em 1em 0.5em 1em;
     border: 1px solid black;
     border-radius: 15px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.route-card > h4 {
+    margin-bottom: 0.25em;
+    font-size: large;
 }
 
 .stop {
@@ -47,3 +100,67 @@ body,
     font-size: larger;
     font-weight: bold;
 }
+
+/* Modal */
+.modal-container {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    padding: 1em;
+    background-color: white;
+}
+
+.modal-container > h3 {
+    margin-bottom: 0.5em;
+}
+
+.search {
+    position: relative;
+}
+
+#select-line {
+    margin-top: 0.5em;
+}
+
+.train-options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.5em;
+}
+
+.train-route-option {
+    padding: 0.5em;
+    border: 1px solid gray;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.train-route-option:hover {
+    background-color: lightgray;
+}
+
+.train-route-option:active {
+    background-color: gray;
+}
+
+.disabled-train-route {
+    background-color: gray;
+}
+
+#station-select {
+    max-height: 20em;
+    overflow-y: scroll;
+}
+
+.station-option {
+    display: flex;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 0.25em;
+}
+
+.station-option:hover {
+    background-color: lightgray;
+}
+
+

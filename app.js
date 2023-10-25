@@ -25,14 +25,13 @@ const BASE_BUS_PARAMS = { key: BUS_API_KEY, format: "json" }
 
 app.get('/train/arrivals', async (req, res) => {
     const arrUrl = `${TRAIN_BASE_URL}/ttarrivals.aspx`
-    let station = req.query.station
+    let stationId = req.query.stationId
     let route = req.query.route
-    console.log(station, route)
     try {
         const arrResp = await axios.get(arrUrl, {
             params: {
                 ...BASE_TRAIN_PARAMS,
-                mapid: station,
+                mapid: stationId,
                 rt: route,
             }
         })
@@ -42,8 +41,9 @@ app.get('/train/arrivals', async (req, res) => {
         const data = arrRespBody.eta.map(train => {
             const arrivingIn = (Date.parse(train.arrT) - Date.parse(train.prdt)) / 60000
             return {
-                serving: train.destNm,
-                servingId: train.destSt,
+                stationName: train.staNm,
+                destinationName: train.destNm,
+                destinationId: train.destSt,
                 due: Boolean(parseInt(train.isApp)),
                 arrivingIn: arrivingIn,
                 arrivalTime: train.arrT,
@@ -57,12 +57,12 @@ app.get('/train/arrivals', async (req, res) => {
 })
 
 app.get('/train/stops', async (req, res) => {
-    // line options: Red, BLue, Brn, G, Org, P, Pink, Y
-    const line = req.query.line
+    // route options: Red, Blue, Brn, G, Org, P, Pink, Y
+    const route = req.query.route
     try {
         const stopsResp = await axios.get('https://data.cityofchicago.org/resource/8pix-ypme.json', {
             params: {
-                $query: `SELECT \`station_name\`, \`station_descriptive_name\`, \`map_id\` WHERE \`${line}\` IN ("true")`
+                $query: `SELECT \`station_name\`, \`station_descriptive_name\`, \`map_id\` WHERE \`${route}\` IN ("true")`
             }
         })
         const data = stopsResp.data.map(stop => {
@@ -71,11 +71,21 @@ app.get('/train/stops', async (req, res) => {
             const linesAtStation = decrName.replace(/\W|lines?/gi, ",").split(",").filter(x => x != "")
             return {
                 stationName: stop["station_name"],
-                lines: linesAtStation,
-                station: stop["map_id"]
+                routesAtStation: linesAtStation,
+                stationId: stop["map_id"]
             }
         })
-        res.send(data)
+
+        // Remove duplicates
+        const unique = new Set()
+        const filtered = data.filter(obj => {
+            const objString = JSON.stringify(obj);
+            const isUnique = !unique.has(objString)
+            if (isUnique) { unique.add(objString) }
+            return isUnique
+        })
+
+        res.send(filtered)
     } catch (error) {
         res.status(500).send(error)
     }
@@ -88,7 +98,7 @@ app.get('/bus/predictions', async (req, res) => {
         const predResp = await axios.get(predUrl, {
             params: {
                 ...BASE_BUS_PARAMS,
-                stpid: req.query.stop,
+                stpid: req.query.stopId,
                 rt: req.query.route,
             }
         })

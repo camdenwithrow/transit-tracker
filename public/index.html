@@ -12,62 +12,44 @@
     <div class="container">
         <div>
             <div class="train section">
-                <h2>Trains</h2>
-                <div class="section-grid">
-                    <div class="route-card">
-                        <h4>Red Line</h4>
-                        <div class="direction">
-                            <p>Howard</p>
-                            <p class="eta">5</p>
-                        </div>
-                        <div class="direction">
-                            <p>95th / Dan Ryan</p>
-                            <p class="eta">13</p>
-                        </div>
-                        <p class="stop">Fullerton</p>
+                <div class="header">
+                    <h2>Trains</h2>
+                    <div class="add">
+                        <button class="button" id="train-add">
+                            <p>+</p>
+                        </button>
                     </div>
-                    <div class="route-card">
-                        <h4>Brown Line</h4>
-                        <div class="direction">
-                            <p>Kimball</p>
-                            <p class="eta">18</p>
-                        </div>
-                        <div class="direction">
-                            <p>Loop</p>
-                            <p class="eta">7</p>
-                        </div>
-                        <p class="stop">Fullerton</p>
-                    </div>
+                </div>
+                <div class="section-grid" id="train-card-container">
+                    <!-- route cards appended here -->
                 </div>
             </div>
             <div class="bus section">
-                <h2>Buses</h2>
-                <div class="section-grid">
-                    <div class="route-card">
-                        <h4>8 Halsted</h4>
-                        <div class="direction">
-                            <p>North</p>
-                            <p class="eta">18</p>
-                        </div>
-                        <div class="direction">
-                            <p>South</p>
-                            <p class="eta">25</p>
-                        </div>
-                        <p class="stop">Halsted / Webster</p>
-                    </div>
-                    <div class="route-card">
-                        <h4>22 Clark</h4>
-                        <div class="direction">
-                            <p>North</p>
-                            <p class="eta">18</p>
-                        </div>
-                        <div class="direction">
-                            <p>South</p>
-                            <p class="eta">25</p>
-                        </div>
-                        <p class="stop">Clark / Webster</p>
+                <div class="header">
+                    <h2>Buses</h2>
+                    <div class="add">
+                        <button class="button" id="bus-add">
+                            <p>+</p>
+                        </button>
                     </div>
                 </div>
+                <div class="section-grid" id="bus-card-container">
+                    <!-- route cards appended here -->
+                </div>
+            </div>
+        </div>
+        <!-- Modal -->
+        <div id="add-modal" class="modal-container hide">
+            <button id="close-modal">close</button>
+            <div id="train-select-container">
+                <div>
+                    <h3>
+                        Add Train
+                    </h3>
+                </div>
+                <div class="train-options-grid" id="select-route">
+                </div>
+                <div id="select-station"></div>
             </div>
         </div>
     </div>
