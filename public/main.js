@@ -12,6 +12,7 @@ function main() {
     const closeModalButton = document.getElementById("close-modal")
     let trainRouteSelected
     let busRouteSelected
+    let selectStationContainer = document.getElementById("select-station")
 
     const trainRouteOptions = {
         "Red": { coc: "Red", cta: "Red", },
@@ -28,6 +29,8 @@ function main() {
         addModal.classList.remove("hide")
 
         const trainOptionsGrid = document.getElementById("select-route")
+        trainOptionsGrid.innerHTML = ""
+
         Object.keys(trainRouteOptions).forEach(route => {
             const newRouteOption = document.createElement("div")
             newRouteOption.className = "train-route-option"
@@ -117,6 +120,7 @@ function main() {
 
     const updateCards = async () => {
         const [trainArrivals, busArrivals] = await fetchDataFromApi()
+        trainCardSection.innerHTML = ""
         trainArrivals.forEach((train) => {
             // Get closest etas for both directions
             let lowestEtas = {}
@@ -171,7 +175,7 @@ function main() {
     }
 
     const openStationOptions = async () => {
-        const selectStationContainer = document.getElementById("select-station")
+        selectStationContainer = document.getElementById("select-station")
         const params = `route=${trainRouteOptions[trainRouteSelected].coc}`
         const trainStopsResp = await fetch(`/train/stops?${params}`)
         const trainStopsData = await trainStopsResp.json()
@@ -192,7 +196,11 @@ function main() {
     }
 
     const selectStation = (e) => {
+        addModal.classList.add("hide")
+        selectStationContainer.innerHTML = ""
         const newTrainData = { route: trainRouteSelected, stationId: e.target.id }
+        if (trains.includes(newTrainData)) return
+
         const newTrains = [...trains]
         newTrains.push(newTrainData)
         updateData("trains", newTrains)
@@ -203,6 +211,9 @@ function main() {
     trains = getData("trains")
     buses = getData("buses")
     updateCards()
+
+    const updateInterval = 15000
+    setInterval(updateCards, updateInterval)
 }
 
 main()
